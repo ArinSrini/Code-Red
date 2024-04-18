@@ -82,5 +82,3 @@ Contributions to this project are welcome! Please fork the repository, make your
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-Feel free to customize this README template based on the specifics of your project and the functionalities of your scripts and notebooks. Include additional sections or information that you think would be valuable for users exploring your audio processing and scrambling tools. Make sure to update the links, descriptions, and instructions accordingly to ensure clarity and ease of understanding.
