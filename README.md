@@ -1,8 +1,5 @@
-Creating a solid GitHub README file is essential for providing clear instructions and information about your project repository. Below is a template you can use to structure your README file, incorporating key sections that will help users understand and engage with your audio processing and scrambling project.
 
----
-
-# Audio Processing and Scrambling Project
+# Code Red
 
 This project includes tools and scripts for audio preprocessing, waveform modeling, and scrambling using Python modules and utilities.
 
@@ -45,7 +42,7 @@ To set up the project locally, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/audio-processing-scrambling.git
+   git clone https://github.com/ArinSrini/Code-Red.git
    ```
 
 2. Install dependencies:
