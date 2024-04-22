@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODE RED SENDER</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ff1111;
+            display: flex; /* Make the body a flex container */
+            align-items: center; /* Align content vertically in center */
+            justify-content: center; /* Align content horizontally in center */
+            min-height: 100vh; /* Set minimum body height for full viewport */
+        }
+
+        /* New main container */
+        .main-container {
+            display: flex; /* Make the main container a flex container */
+            align-items: center; /* Align content vertically in center */
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;  /* Center the container horizontally */
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around; /* Maintains even spacing */
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            margin: 0 10px; /* Adds spacing between buttons */
+        }
+
+        #recordButton {
+            background-color: #ff0000;
+        }
+
+        #stopButton {
+            background-color: #333;
+        }
+
+        #playButton {
+            background-color: #009900;
+        }
+
+        #sendButton {
+            background-color: #0000ff;
+        }
+
+        #uploadInput {
+            display: none;
+        }
+
+        #uploadButton {
+            background-color: #ff6600;
+        }
+
+        #uploadLabel {
+            display: block;
+            padding: 10px 20px;
+            background-color: #ff6600;
+            color: #fff;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            margin: 20px auto;
+        }
+
+        #uploadLabel:hover {
+            background-color: #ff9933;
+        }
+
+        /* Styles for the images */
+        .image-container {
+            width: 200px; /* Adjust width as needed */
+            height: 200px; /* Adjust height as needed */
+            background-size: cover; /* Ensure images fill the container */
+            background-position: center; /* Center images within the container */
+            margin: 0 20px 0 0;  /* Adjust margins for spacing */
+        }
+
+        /* Style for the waveform */
+        #waveform {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <img src="C:\Users\HP\OneDrive\Desktop\VIT\SEMESTER 6\codered.png" alt="Image 1" class="image-container">
+        <div class="container">
+            <h1>CODE RED</h1>
+            <div class="buttons">
+                <button id="recordButton">Record</button>
+                <button id="stopButton">Stop</button>
+                <button id="playButton">Play</button>
+                <button id="sendButton">Send</button>
+            </div>
+            <div id="waveform"></div>
+            <audio controls id="audioPlayer"></audio>
+
+            <input type="file" id="uploadInput">
+            <label for="uploadInput" id="uploadLabel">Upload Message</label>
+        </div>
+    </div>
+
+
+    <!-- Include Wavesurfer.js library -->
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let audioPlayer = document.getElementById('audioPlayer');
+
+        // Initialize Wavesurfer
+        const wavesurfer = WaveSurfer.create({
+            container: '#waveform',
+            waveColor: 'violet',
+            progressColor: 'purple',
+            cursorWidth: 1,
+            height: 100
+        });
+
+        document.getElementById('recordButton').addEventListener('click', startRecording);
+        document.getElementById('stopButton').addEventListener('click', stopRecording);
+        document.getElementById('playButton').addEventListener('click', playRecording);
+        document.getElementById('sendButton').addEventListener('click', sendAudioToServer);
+
+function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = function(e) {
+                // Create Blob with 'audio/wav' MIME type
+                recordedChunks.push(new Blob([e.data], { type: 'audio/wav' }));
+            };
+            mediaRecorder.start();
+            console.log('Recording started');
+        })
+        .catch(function(err) {
+            console.error('Error accessing microphone:', err);
+        });
+}
+
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                console.log('Recording stopped');
+            } else {
+                console.warn('No recording to stop');
+            }
+        }
+
+        function playRecording() {
+            if (recordedChunks.length === 0) {
+                console.warn('No audio to play');
+                return;
+            }
+
+            const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+            audioPlayer.src = URL.createObjectURL(blob);
+            audioPlayer.play();
+            console.log('Playing recorded audio');
+        }
+
+  
+    function sendAudioToServer() {
+            if (recordedChunks.length === 0) {
+                console.warn('No audio to send');
+                return;
+            }
+
+            const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+
+            const formData = new FormData();
+            formData.append('audio', blob);
+
+            fetch('http://127.0.0.1:5000/process_audio', {  // Update the URL to match your Flask server endpoint
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data);
+                // Reset recordedChunks after sending
+                recordedChunks = [];
+            })
+            .catch(error => console.error('Error sending audio:', error));
+        }
+
+
+        // Load audio data into Wavesurfer
+        function loadAudio(audioBlob) {
+            const url = URL.createObjectURL(audioBlob);
+            wavesurfer.load(url);
+        }
+
+        // Stop recording function
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                console.log('Recording stopped');
+                wavesurfer.empty(); // Clear previous waveform
+                loadAudio(new Blob(recordedChunks, { type: 'audio/wav' }));
+            } else {
+                console.warn('No recording to stop');
+            }
+        }
+
+        // Event listener for when audio data is available
+        wavesurfer.on('ready', function() {
+            console.log('Waveform ready');
+        });
+    </script>
+</body>
+</html>
