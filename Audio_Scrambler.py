@@ -1,55 +1,68 @@
-import sys
-import pyaudio
-import wave
-import time
-import signal
-import logging
+from flask import Flask, render_template
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired
+import numpy as np
+import soundfile as sf
+import tenseal as ts
 
-CHUNK = 4096
-FORMAT = pyaudio.paInt16
-CHANNELS = 1  # Change to 1 for mono
-LOOP_SECONDS = 2
-RECORD_SECONDS = 6
-WAVE_OUTPUT_FILENAME = "output2.wav"
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key_here'
 
-p = pyaudio.PyAudio()
-info = p.get_default_input_device_info()
-RATE = int(info['defaultSampleRate'])
+# Dummy storage for sender's binary data (in a real app, this would be a database)
+sender_data = None
 
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK)
+# YASHE context setup
+context = ts.context(ts.SCHEME_TYPE.BGV, poly_modulus_degree=4096, plain_modulus=40961)
+secret_key = context.secret_key()
+public_key = context.public_key()
 
-logging.info("* recording")
+# Web form for receiver's private key input
+class PrivateKeyForm(FlaskForm):
+    private_key = PasswordField('Private Key', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
-outfile = open(WAVE_OUTPUT_FILENAME, 'wb')
-wf = wave.open(outfile, 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(p.get_sample_size(FORMAT))
-wf.setframerate(RATE)
+# Route for sender to record audio
+@app.route('/', methods=['GET', 'POST'])
+def record_audio():
+    global sender_data
 
-def record():
-    for i in range(0, RECORD_SECONDS // LOOP_SECONDS):
-        for j in range(0, int(RATE / CHUNK * LOOP_SECONDS)):
-            data = stream.read(CHUNK)
-            wf.writeframes(data)
+    if request.method == 'POST':
+        # Simulate audio recording and conversion to binary data
+        audio_data = np.random.randint(0, 2, size=10)  # Example binary data (replace with actual conversion)
 
-def cleanup():
-    logging.info("* done recording")
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
-    wf.close()
-    outfile.close()
+        # Apply YASHE encryption
+        encrypted_data = context.encrypt(audio_data, public_key)
 
-def handle_sigint(sig, frame):
-    logging.info("Exiting!")
-    cleanup()
-    sys.exit(0)
+        # Store encrypted data (in a real app, store in a database associated with sender)
+        sender_data = encrypted_data.serialize()
 
-signal.signal(signal.SIGINT, handle_sigint)
+        return redirect(url_for('record_audio'))
 
-record()
-cleanup()
+    return render_template('record_audio.html')
+
+# Route for receiver to input private key and decrypt data
+@app.route('/decrypt', methods=['GET', 'POST'])
+def decrypt_audio():
+    form = PrivateKeyForm()
+
+    if form.validate_on_submit():
+        private_key_str = form.private_key.data
+        private_key = ts.keygen(context, private_key_str)
+
+        # Retrieve and decrypt sender's data
+        decrypted_data = ts.Ciphertext(context, private_key).deserialize(sender_data)
+        decrypted_audio = context.decrypt(decrypted_data, secret_key)
+
+        # Perform audio reconstruction (replace with actual reconstruction process)
+        reconstructed_audio = np.random.randint(0, 2, size=10)  # Example reconstruction
+
+        # Save or play reconstructed audio (replace with actual saving or playback)
+
+        flash('Audio decrypted and reconstructed successfully!', 'success')
+        return redirect(url_for('decrypt_audio'))
+
+    return render_template('decrypt_audio.html', form=form)
+
+if __name__ == '__main__':
+    app.run(debug=True)
