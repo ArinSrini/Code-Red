@@ -51,15 +51,89 @@ To set up the project locally, follow these steps:
    pip install -r requirements.txt
    ```
 
+To create an updated GitHub README file for your project structure, you can provide a brief description of the project and explain the directory structure. Below is an example of how you might structure the README file:
+
+---
+
+# Audio Encryption Demo
+
+This project demonstrates a web-based audio encryption and decryption application using Flask, HTML/CSS/JS, and Python libraries for audio processing.
+
+## Project Structure
+
+```
+project_folder/
+│
+├── static/
+│   └── js/
+│       └── main.js
+│   └── css/
+│       └── style.css
+│
+├── templates/
+│   ├── index.html
+│   ├── sender.html
+│   └── receiver.html
+│
+└── app.py
+```
+
+### Description
+
+- **static/**: Contains static files for the web application.
+  - **js/**: JavaScript files used for client-side scripting.
+    - **main.js**: JavaScript code for handling client-side interactions.
+  - **css/**: Cascading Style Sheets (CSS) for styling HTML content.
+    - **style.css**: CSS file defining styles for HTML elements.
+
+- **templates/**: Contains HTML templates for different pages of the web application.
+  - **index.html**: Main landing page for the application.
+  - **sender.html**: Page for recording and sending audio.
+  - **receiver.html**: Page for receiving and decrypting audio.
+
+- **app.py**: Main Python script implementing the Flask application.
+  - Defines routes and handles interactions between client and server.
+
+## Getting Started
+
+To run the application locally:
+
+1. Install Python (if not already installed).
+
+2. Clone this repository:
+   ```bash
+   git clone https://github.com/ArinSrini/Code-Red.git
+   ```
+3. Navigate to the project directory:
+   ```bash
+   cd Code-Red
+   ```
+4. Install dependencies using pip:
+   ```bash
+   pip install -r requirements.txt
+   ```
+5. Start the Flask application:
+   ```bash
+   python app.py
+   ```
+6. Open a web browser and navigate to `http://localhost:5000` to access the application.
+
 ## Usage
 
-### Recording Audio
+- Visit `http://localhost:5000` to access the main application.
+- Click on "Sender" to navigate to the sender page for recording audio.
+- Click on "Receiver" to navigate to the receiver page for decrypting audio.
 
-Use `Audio_Scrambler.py` to record audio and save it as a WAV file (`output2.wav`):
+## Dependencies
 
-```bash
-python Audio_Scrambler.py
-```
+- Flask
+- WTForms
+- NumPy
+- SoundFile
+
+---
+
+Ensure to customize the installation steps and usage instructions based on your project's dependencies and functionalities. This README file provides a starting point to introduce your project and guide users on how to get started with running and using the application.
 
 ### Audio Preprocessing and Modeling
 
