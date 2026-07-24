@@ -1,6 +1,7 @@
 
-# Code Red
+# Voice Scrambler for Secure Communication
 
+Real-Time Secure Communication System
 This project includes tools and scripts for audio preprocessing, waveform modeling, and scrambling using Python modules and utilities.
 
 ## Table of Contents
